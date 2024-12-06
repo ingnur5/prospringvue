@@ -18,11 +18,23 @@ public class ClienteService {
     }
     public Cliente gurdarCliente(Cliente cliente){
         try {
+            if (clienteRepository.existsById(cliente.getDocumento())) {
+                throw new RuntimeException("Ya existe un cliente con este documento");
+            }
             return clienteRepository.save(cliente);
         } catch (DataAccessException e){
             throw new RuntimeException("Error al guardar el cliente");
         }
 
+    }
+
+    public Cliente consultarClientePorId(String id) {
+        Optional<Cliente> cliente = clienteRepository.findById(id);
+        if (cliente.isPresent()) {
+            return cliente.get();
+        } else {
+            throw new RuntimeException("Cliente no encontrado con ID: " + id);
+        }
     }
 
 

@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/datos")
+@CrossOrigin(origins = "http://localhost:5173") // Permite solicitudes desde tu cliente Vue
 public class ClienteController {
     private  final ClienteService clienteService;
 
@@ -17,20 +18,27 @@ public class ClienteController {
         this.clienteService = clienteService;
     }
     @PostMapping
-    public Cliente guardarCliente(@RequestBody Cliente cliente){
-
+    public ResponseEntity<?> guardarCliente(@RequestBody Cliente cliente) {
         try {
-            return clienteService.gurdarCliente(cliente);
-        }catch (RuntimeException e) {
-            throw new RuntimeException("Error al guardar el cliente");
+            Cliente nuevoCliente = clienteService.gurdarCliente(cliente);
+            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoCliente);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
         }
-
     }
-
     @GetMapping
     public List<Cliente> consultarCliente(){
         return  clienteService.consultarCliente();
 
+    }
+    @GetMapping("cliente/{id}")
+    public ResponseEntity<Cliente> consultarClientePorId(@PathVariable("id") String id) {
+        try {
+            Cliente cliente = clienteService.consultarClientePorId(id);
+            return new ResponseEntity<>(cliente, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
     }
 
     @GetMapping("/{cliente}")
